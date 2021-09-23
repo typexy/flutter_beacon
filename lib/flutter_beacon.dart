@@ -21,10 +21,17 @@ part 'beacon/ranging_result.dart';
 part 'beacon/region.dart';
 
 /// Singleton instance for accessing scanning API.
-final FlutterBeacon flutterBeacon = new FlutterBeacon._internal();
+final FlutterBeacon flutterBeacon = FlutterBeacon();
 
 /// Provide iBeacon scanning API for both Android and iOS.
 class FlutterBeacon {
+
+  static final FlutterBeacon _flutterBeacon = FlutterBeacon._internal();
+
+  factory FlutterBeacon() {
+    return _flutterBeacon ?? FlutterBeacon._internal();
+  }
+
   FlutterBeacon._internal();
 
   /// Method Channel used to communicate to native code.
