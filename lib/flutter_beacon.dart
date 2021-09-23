@@ -13,11 +13,17 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 
 part 'beacon/authorization_status.dart';
+
 part 'beacon/beacon.dart';
+
 part 'beacon/beacon_broadcast.dart';
+
 part 'beacon/bluetooth_state.dart';
+
 part 'beacon/monitoring_result.dart';
+
 part 'beacon/ranging_result.dart';
+
 part 'beacon/region.dart';
 
 /// Singleton instance for accessing scanning API.
@@ -25,36 +31,47 @@ final FlutterBeacon flutterBeacon = FlutterBeacon();
 
 /// Provide iBeacon scanning API for both Android and iOS.
 class FlutterBeacon {
-
   static final FlutterBeacon _flutterBeacon = FlutterBeacon._internal();
+
+  /// Method Channel used to communicate to native code.
+  static MethodChannel _methodChannel;
+
+  /// Event Channel used to communicate to native code ranging beacons.
+  static EventChannel _rangingChannel;
+
+  /// Event Channel used to communicate to native code monitoring beacons.
+  static EventChannel _monitoringChannel;
+
+  /// Event Channel used to communicate to native code to checking
+  /// for bluetooth state changed.
+  static EventChannel _bluetoothStateChangedChannel;
+
+  /// Event Channel used to communicate to native code to checking
+  /// for bluetooth state changed.
+  static EventChannel _authorizationStatusChangedChannel;
+
 
   factory FlutterBeacon() {
     return _flutterBeacon ?? FlutterBeacon._internal();
   }
 
-  FlutterBeacon._internal();
+  FlutterBeacon._internal(){
+    _methodChannel = MethodChannel('flutter_beacon');
 
-  /// Method Channel used to communicate to native code.
-  static const MethodChannel _methodChannel =
-      const MethodChannel('flutter_beacon');
+    /// Event Channel used to communicate to native code ranging beacons.
+    _rangingChannel = EventChannel('flutter_beacon_event');
 
-  /// Event Channel used to communicate to native code ranging beacons.
-  static const EventChannel _rangingChannel =
-      EventChannel('flutter_beacon_event');
+    /// Event Channel used to communicate to native code monitoring beacons.
+    _monitoringChannel = EventChannel('flutter_beacon_event_monitoring');
 
-  /// Event Channel used to communicate to native code monitoring beacons.
-  static const EventChannel _monitoringChannel =
-      EventChannel('flutter_beacon_event_monitoring');
+    /// Event Channel used to communicate to native code to checking
+    /// for bluetooth state changed.
+    _bluetoothStateChangedChannel = EventChannel('flutter_bluetooth_state_changed');
 
-  /// Event Channel used to communicate to native code to checking
-  /// for bluetooth state changed.
-  static const EventChannel _bluetoothStateChangedChannel =
-      EventChannel('flutter_bluetooth_state_changed');
-
-  /// Event Channel used to communicate to native code to checking
-  /// for bluetooth state changed.
-  static const EventChannel _authorizationStatusChangedChannel =
-      EventChannel('flutter_authorization_status_changed');
+    /// Event Channel used to communicate to native code to checking
+    /// for bluetooth state changed.
+    _authorizationStatusChangedChannel = EventChannel('flutter_authorization_status_changed');
+  }
 
   /// This information does not change from call to call. Cache it.
   Stream<BluetoothState>? _onBluetoothState;
@@ -117,7 +134,7 @@ class FlutterBeacon {
   /// Return `true` when location service is enabled, otherwise `false`.
   Future<bool> get checkLocationServicesIfEnabled async {
     final result =
-        await _methodChannel.invokeMethod('checkLocationServicesIfEnabled');
+    await _methodChannel.invokeMethod('checkLocationServicesIfEnabled');
 
     if (result is bool) {
       return result;
